@@ -3,7 +3,7 @@
 * 一旦、s3バケット上のgzファイルを取得して、解凍して、中身を出力して、再びアップロード
 
 ## 事前準備
-* samのインストール。pipするだけ
+* samのインストール。pipするだけ   
   https://github.com/awslabs/aws-sam-cli#windows-linux-macos-with-pip-recommended
 
 ## 手順
@@ -15,12 +15,12 @@
 
 * ネットワーク確認（[参考](https://qiita.com/mizue/items/7bd79d868a7df888388c#docker-compose-構成)）
   * compose.ymlのなかでaws_netという名前でネットワーク作ってるので、そのID確認しておく
-```
-$ docker-network ls
-NETWORK ID          NAME                            DRIVER              SCOPE
-123456abcdef        bridge                          bridge              local
-[AWS_NET_ID]        [CURRENT_DIR_NAME]_aws_net      bridge              local
-```
+  ```
+  $ docker-network ls
+  NETWORK ID          NAME                            DRIVER              SCOPE
+  123456abcdef        bridge                          bridge              local
+  [AWS_NET_ID]        [CURRENT_DIR_NAME]_aws_net      bridge              local
+  ```
 
 * s3 putObjectイベントの発行とlambda呼び出し
   * lambdaをaws_net上で起動させる
