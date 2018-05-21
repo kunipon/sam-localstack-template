@@ -1,0 +1,47 @@
+version: '2.1'
+
+networks:
+  aws_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.238.0/24
+          gateway: 172.16.238.1
+
+services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4567-4583:4567-4583"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=s3:4572,apigateway:4567
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    networks:
+      - aws_net
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  awscli:
+    image: xueshanf/awscli
+    environment:
+      - AWS_DEFAULT_REGION=ap-northeast-1
+      - AWS_DEFAULT_OUTPUT=json
+      - AWS_ACCESS_KEY_ID=dummy
+      - AWS_SECRET_ACCESS_KEY=dummy
+    extra_hosts:
+      - "localstack:172.16.238.1"
+    volumes:
+      - "./input-bucket:/home/input-bucket"
+    depends_on:
+      - localstack
+    entrypoint: >
+      /bin/sh -c
+      "aws --endpoint-url=http://localstack:4572 s3 mb s3://input-bucket/
+      && aws --endpoint-url=http://localstack:4572 s3 cp /home/input-bucket s3://input-bucket/ --recursive"
